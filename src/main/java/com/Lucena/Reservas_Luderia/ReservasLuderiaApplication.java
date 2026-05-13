@@ -1,0 +1,13 @@
+package com.Lucena.Reservas_Luderia;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ReservasLuderiaApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ReservasLuderiaApplication.class, args);
+	}
+
+}

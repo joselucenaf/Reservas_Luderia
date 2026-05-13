@@ -1,0 +1,27 @@
+# --- Compilação e Build ---
+target/
+build/
+out/
+.mvn/
+mvnw
+mvnw.cmd
+
+# --- IntelliJ IDEA ---
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# --- macOS (Essencial para você) ---
+.DS_Store
+.AppleDouble
+.LSOverride
+**/._*
+
+# --- Logs e Arquivos Temporários ---
+*.log
+tmp/
+
+# --- Arquivos de Ajuda e Markdown ---
+HELP.md
