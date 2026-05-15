@@ -3,6 +3,8 @@ package com.Lucena.Reservas_Luderia.infrastructure.repository;
 import com.Lucena.Reservas_Luderia.infrastructure.entity.Reserva;
 import com.Lucena.Reservas_Luderia.infrastructure.enums.StatusReserva;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -11,16 +13,23 @@ import java.util.List;
 @Repository
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
-    // Busca todas as reservas de um usuário específico
     List<Reserva> findByUsuarioId(Long usuarioId);
 
-    // Busca reservas por status (Ex: ver todos os que estão PENDENTES)
     List<Reserva> findByStatus(StatusReserva status);
 
-    // Verifica se um jogo já está reservado em um determinado período
-    // Importante para evitar que duas pessoas reservem o mesmo jogo no mesmo horário
-    boolean existsByJogoIdAndDataInicioBetween(Long jogoId, LocalDateTime inicio, LocalDateTime fim);
+    /**
+     * Verifica sobreposição de horários para um jogo específico.
+     * A lógica (NovoInicio < FimExistente) AND (NovoFim > InicioExistente)
+     * garante a detecção de qualquer interseção entre os períodos.
+     * Também ignoramos reservas CANCELADAS na verificação.
+     */
+    @Query("SELECT COUNT(r) > 0 FROM Reserva r " +
+            "WHERE r.jogoId = :jogoId " +
+            "AND r.status <> 'CANCELADA' " +
+            "AND (:inicio < r.dataFim AND :fim > r.dataInicio)")
+    boolean verificarSobreposicao(@Param("jogoId") Long jogoId,
+                                  @Param("inicio") LocalDateTime inicio,
+                                  @Param("fim") LocalDateTime fim);
 
-    // Busca reservas que terminam hoje (útil para disparar avisos de devolução)
     List<Reserva> findByDataFimBeforeAndStatus(LocalDateTime data, StatusReserva status);
 }
