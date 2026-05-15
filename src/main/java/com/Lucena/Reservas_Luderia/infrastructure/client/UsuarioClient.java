@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "usuario", url = "${usuario.url}")
 public interface UsuarioClient {
-    // O parâmetro "login" aceita tanto email quanto CPF, conforme o seu microserviço de usuário
+
     @GetMapping("/usuario")
     UsuarioDTO buscaUsuarioPorLogin(@RequestParam("login") String login);
 }

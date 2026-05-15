@@ -1,6 +1,5 @@
 package com.Lucena.Reservas_Luderia.business.service;
 
-import com.Lucena.Reservas_Luderia.business.converter.ReservaConverter;
 import com.Lucena.Reservas_Luderia.infrastructure.client.CatalogoClient;
 import com.Lucena.Reservas_Luderia.infrastructure.client.UsuarioClient;
 import com.Lucena.Reservas_Luderia.infrastructure.entity.Reserva;
@@ -21,34 +20,17 @@ public class ReservaServiceImpl implements ReservaService {
     private final ReservaRepository reservaRepository;
     private final CatalogoClient catalogoClient;
     private final UsuarioClient usuarioClient;
-    private final ReservaConverter reservaConverter;
 
     @Override
     public Reserva salvarReserva(Reserva reserva) {
-        // 1. Validação via Feign: O Jogo existe no Catálogo?
-        try {
-            catalogoClient.buscarJogoPorId(reserva.getJogoId());
-        } catch (Exception e) {
-            throw new ResourceNotFoundException("Jogo com ID " + reserva.getJogoId() + " não encontrado no catálogo.");
-        }
+        // 1. Validação centralizada de Usuário e Jogo (via Feign)
+        validarIntegridadeExterna(reserva);
 
-        // 2. Validação via Feign: O Usuário existe?
-        try {
-            // Note: Ajustei para converter o ID em String se o seu client esperar String login
-            usuarioClient.buscaUsuarioPorLogin(reserva.getUsuarioId().toString());
-        } catch (Exception e) {
-            throw new ResourceNotFoundException("Usuário com ID " + reserva.getUsuarioId() + " não encontrado.");
-        }
-
-        // 3. Validação de conflito de horário: O jogo está livre nessa data?
-        boolean jaReservado = reservaRepository.existsByJogoIdAndDataInicioBetween(
-                reserva.getJogoId(),
-                reserva.getDataInicio(),
-                reserva.getDataFim()
-        );
-
-        if (jaReservado) {
-            throw new ConflictException("Conflito: Este jogo já possui uma reserva para o período selecionado.");
+        // 2. Validação de conflito de horário usando o novo método refatorado
+        // Alterado de 'existsByJogoIdAndDataInicioBetween' para 'verificarSobreposicao'
+        if (reservaRepository.verificarSobreposicao(
+                reserva.getJogoId(), reserva.getDataInicio(), reserva.getDataFim())) {
+            throw new ConflictException("Este jogo já possui uma reserva ativa para o período selecionado.");
         }
 
         // Configurações automáticas para nova reserva
@@ -56,6 +38,16 @@ public class ReservaServiceImpl implements ReservaService {
         reserva.setStatus(StatusReserva.PENDENTE);
 
         return reservaRepository.save(reserva);
+    }
+
+    private void validarIntegridadeExterna(Reserva reserva) {
+        try {
+            catalogoClient.buscarJogoPorId(reserva.getJogoId());
+            // Busca usuário por ID convertendo para String para o parâmetro 'login' do microserviço
+            usuarioClient.buscaUsuarioPorLogin(reserva.getUsuarioId().toString());
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("Falha na integração: Jogo ou Usuário não localizado nos serviços externos.");
+        }
     }
 
     @Override
@@ -78,7 +70,7 @@ public class ReservaServiceImpl implements ReservaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva não encontrada com o ID: " + id));
 
         reserva.setStatus(StatusReserva.CANCELADA);
-        reserva.setDataFim(LocalDateTime.now()); // Registra o momento do cancelamento
+        reserva.setDataFim(LocalDateTime.now()); // Registra o momento do cancelamento lógico
 
         reservaRepository.save(reserva);
     }
