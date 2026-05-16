@@ -23,17 +23,12 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Override
     public Reserva salvarReserva(Reserva reserva) {
-        // 1. Validação centralizada de Usuário e Jogo (via Feign)
         validarIntegridadeExterna(reserva);
-
-        // 2. Validação de conflito de horário usando o novo método refatorado
-        // Alterado de 'existsByJogoIdAndDataInicioBetween' para 'verificarSobreposicao'
         if (reservaRepository.verificarSobreposicao(
                 reserva.getJogoId(), reserva.getDataInicio(), reserva.getDataFim())) {
             throw new ConflictException("Este jogo já possui uma reserva ativa para o período selecionado.");
         }
 
-        // Configurações automáticas para nova reserva
         reserva.setDataReserva(LocalDateTime.now());
         reserva.setStatus(StatusReserva.PENDENTE);
 
@@ -43,10 +38,14 @@ public class ReservaServiceImpl implements ReservaService {
     private void validarIntegridadeExterna(Reserva reserva) {
         try {
             catalogoClient.buscarJogoPorId(reserva.getJogoId());
-            // Busca usuário por ID convertendo para String para o parâmetro 'login' do microserviço
-            usuarioClient.buscaUsuarioPorLogin(reserva.getUsuarioId().toString());
         } catch (Exception e) {
-            throw new ResourceNotFoundException("Falha na integração: Jogo ou Usuário não localizado nos serviços externos.");
+            throw new ResourceNotFoundException("Falha na integração: Jogo com ID " + reserva.getJogoId() + " não foi localizado no catálogo.");
+        }
+
+        try {
+            usuarioClient.buscarUsuarioPorId(reserva.getUsuarioId());
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("Falha na integração: Usuário com ID " + reserva.getUsuarioId() + " não foi localizado no serviço de usuários.");
         }
     }
 
