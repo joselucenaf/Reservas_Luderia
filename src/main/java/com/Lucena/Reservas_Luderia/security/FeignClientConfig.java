@@ -1,0 +1,34 @@
+package com.Lucena.Reservas_Luderia.security;
+
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+@Configuration
+public class FeignClientConfig {
+
+    @Bean
+    public RequestInterceptor requestInterceptor() {
+        return new RequestInterceptor() {
+            @Override
+            public void apply(RequestTemplate template) {
+
+                ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+                if (attributes != null) {
+                    HttpServletRequest request = attributes.getRequest();
+                    String authorizationHeader = request.getHeader("Authorization");
+
+                    // Se a requisição contiver um Token JWT, injeta ele na chamada que o Feign vai fazer
+                    if (authorizationHeader != null) {
+                        template.header("Authorization", authorizationHeader);
+                    }
+                }
+            }
+        };
+    }
+}
