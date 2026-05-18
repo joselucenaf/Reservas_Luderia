@@ -22,8 +22,6 @@ public class FeignClientConfig {
                 if (attributes != null) {
                     HttpServletRequest request = attributes.getRequest();
                     String authorizationHeader = request.getHeader("Authorization");
-
-                    // Se a requisição contiver um Token JWT, injeta ele na chamada que o Feign vai fazer
                     if (authorizationHeader != null) {
                         template.header("Authorization", authorizationHeader);
                     }

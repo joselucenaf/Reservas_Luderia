@@ -14,11 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 )
 public interface UsuarioClient {
 
-    // Usado pelo Service de Reservas para validar o JSON (usuarioId: 2)
     @GetMapping("/{id}")
     UsuarioDTO buscarUsuarioPorId(@PathVariable("id") Long id);
-
-    // Usado pela Segurança (UserDetailsServiceImpl) para encontrar o usuário pelo e-mail do token
     @GetMapping
     UsuarioDTO buscaUsuarioPorLogin(@RequestParam("login") String login);
 }

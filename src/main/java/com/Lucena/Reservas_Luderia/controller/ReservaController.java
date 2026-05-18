@@ -3,6 +3,7 @@ package com.Lucena.Reservas_Luderia.controller;
 import com.Lucena.Reservas_Luderia.business.converter.ReservaConverter;
 import com.Lucena.Reservas_Luderia.business.dto.ReservaDTO;
 import com.Lucena.Reservas_Luderia.business.service.ReservaService;
+import com.Lucena.Reservas_Luderia.infrastructure.entity.Reserva;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,9 @@ public class ReservaController {
 
     @PostMapping
     public ResponseEntity<ReservaDTO> salvarReserva(@RequestBody ReservaDTO dto) {
-        ReservaDTO reservaSalva = reservaConverter.paraDTO(
-                reservaService.salvarReserva(reservaConverter.paraEntity(dto)));
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservaSalva);
+        Reserva reserva = reservaConverter.paraEntity(dto);
+        Reserva reservaSalva = reservaService.salvarReserva(reserva);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservaConverter.paraDTO(reservaSalva));
     }
 
     @GetMapping

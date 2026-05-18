@@ -15,6 +15,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findByUsuarioId(Long usuarioId);
 
+    List<Reserva> findByStatus(StatusReserva status);
+
     /**
      * Verifica sobreposição de horários para um jogo específico.
      * A lógica (NovoInicio < FimExistente) AND (NovoFim > InicioExistente)

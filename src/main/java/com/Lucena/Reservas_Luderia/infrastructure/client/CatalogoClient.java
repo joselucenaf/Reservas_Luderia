@@ -5,7 +5,7 @@ import com.Lucena.Reservas_Luderia.security.FeignClientConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PatchMapping; // 1. IMPORTANTE: Adicione este import
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @FeignClient(
         name = "catalogo-jogos",
@@ -17,7 +17,7 @@ public interface CatalogoClient {
     @GetMapping("/jogos/{id}")
     JogoDTO buscarJogoPorId(@PathVariable("id") Long id);
 
-    // 2. ADICIONE ESTE MÉTODO: Ele mapeia o endpoint de decremento do Catálogo
+    //endpoint de decremento do Catálogo
     @PatchMapping("/jogos/{id}/decrementar-estoque")
     void decrementarEstoque(@PathVariable("id") Long id);
 }
