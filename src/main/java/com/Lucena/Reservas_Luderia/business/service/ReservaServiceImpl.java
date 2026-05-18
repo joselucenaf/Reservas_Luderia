@@ -9,6 +9,7 @@ import com.Lucena.Reservas_Luderia.infrastructure.exceptions.ResourceNotFoundExc
 import com.Lucena.Reservas_Luderia.infrastructure.repository.ReservaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Adicionado para garantir consistência local
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,17 +23,24 @@ public class ReservaServiceImpl implements ReservaService {
     private final UsuarioClient usuarioClient;
 
     @Override
+    @Transactional
     public Reserva salvarReserva(Reserva reserva) {
+
         validarIntegridadeExterna(reserva);
         if (reservaRepository.verificarSobreposicao(
                 reserva.getJogoId(), reserva.getDataInicio(), reserva.getDataFim())) {
             throw new ConflictException("Este jogo já possui uma reserva ativa para o período selecionado.");
         }
 
+
         reserva.setDataReserva(LocalDateTime.now());
         reserva.setStatus(StatusReserva.PENDENTE);
+        Reserva reservaSalva = reservaRepository.save(reserva);
 
-        return reservaRepository.save(reserva);
+        //Dispara a chamada via OpenFeign para atualizar o estoque lá no Catálogo
+        catalogoClient.decrementarEstoque(reservaSalva.getJogoId());
+
+        return reservaSalva;
     }
 
     private void validarIntegridadeExterna(Reserva reserva) {
