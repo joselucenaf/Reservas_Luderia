@@ -8,4 +8,6 @@ public interface ReservaService {
     List<Reserva> buscarTodas();
     List<Reserva> buscarPorUsuario(Long usuarioId);
     void cancelarReserva(Long id);
+    void confirmarReserva(Long id);
+    void finalizarReserva(Long id);
 }

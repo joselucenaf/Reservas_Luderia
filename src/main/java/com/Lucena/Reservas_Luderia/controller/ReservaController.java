@@ -49,4 +49,16 @@ public class ReservaController {
         reservaService.cancelarReserva(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/confirmar")
+    public ResponseEntity<Void> confirmarReserva(@PathVariable Long id) {
+        reservaService.confirmarReserva(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/finalizar")
+    public ResponseEntity<Void> finalizarReserva(@PathVariable Long id) {
+        reservaService.finalizarReserva(id);
+        return ResponseEntity.noContent().build();
+    }
 }
