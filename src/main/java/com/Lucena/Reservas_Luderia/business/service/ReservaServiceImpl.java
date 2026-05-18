@@ -81,4 +81,32 @@ public class ReservaServiceImpl implements ReservaService {
 
         reservaRepository.save(reserva);
     }
+
+    @Override
+    @Transactional
+    public void confirmarReserva(Long id) {
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva não encontrada com o ID: " + id));
+
+        if (reserva.getStatus() != StatusReserva.PENDENTE) {
+            throw new ConflictException("Apenas reservas PENDENTES podem ser confirmadas.");
+        }
+
+        reserva.setStatus(StatusReserva.CONFIRMADA);
+        reservaRepository.save(reserva);
+    }
+
+    @Override
+    @Transactional
+    public void finalizarReserva(Long id) {
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva não encontrada com o ID: " + id));
+
+        if (reserva.getStatus() != StatusReserva.CONFIRMADA) {
+            throw new ConflictException("Apenas reservas CONFIRMADAS podem ser finalizadas.");
+        }
+
+        reserva.setStatus(StatusReserva.FINALIZADA);
+        reservaRepository.save(reserva);
+    }
 }
