@@ -9,8 +9,7 @@ import com.Lucena.Reservas_Luderia.infrastructure.exceptions.ResourceNotFoundExc
 import com.Lucena.Reservas_Luderia.infrastructure.repository.ReservaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Adicionado para garantir consistência local
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
